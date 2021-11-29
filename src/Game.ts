@@ -1,5 +1,4 @@
 import GameLoop from './GameLoop.js';
-import KeyListener from './KeyListener.js';
 import Player from './Player.js';
 import Trophy from './Trophy.js';
 
@@ -7,6 +6,10 @@ import Trophy from './Trophy.js';
  * Main class of this Game.
  */
 export default class Game {
+  private player: Player;
+
+  private trophy: Trophy;
+
   // The canvas
   private canvas: HTMLCanvasElement;
 
@@ -35,6 +38,12 @@ export default class Game {
     this.middleLane = this.canvas.width / 2;
     this.rightLane = (this.canvas.width / 4) * 3;
 
+    // Create a new player
+    this.player = new Player(this.canvas);
+
+    // Create a trophy
+    this.trophy = new Trophy(this.canvas);
+
     // Start the animation
     console.log('Start animation');
     this.gameloop = new GameLoop(this);
@@ -45,7 +54,7 @@ export default class Game {
    * Handles any user input that has happened since the last call
    */
   public processInput(): void {
-
+    this.player.processInput();
   }
 
   /**
@@ -57,47 +66,17 @@ export default class Game {
    * @returns `true` if the game should stop animation
    */
   public update(elapsed: number): boolean {
+    this.trophy.moveTrophy(elapsed);
     // Collision detection of objects and player
     // Use the bounding box detection method: https://computersciencewiki.org/index.php/Bounding_boxes
     // TODO adjust for multiple objects
-    if (this.playerPositionX < this.trophyPositionX + this.trophyImage.width
-      && this.playerPositionX + this.playerImage.width > this.trophyPositionX
-      && this.canvas.height - 150 < this.trophyPositionY + this.trophyImage.height
-      && this.canvas.height - 150 + this.playerImage.height > this.trophyPositionY) {
-      // Create a new trophy in a random lane
-      const random = Game.randomInteger(1, 3);
-      if (random === 1) {
-        this.trophyPositionX = this.leftLane;
-      }
-      if (random === 2) {
-        this.trophyPositionX = this.middleLane;
-      }
-      if (random === 3) {
-        this.trophyPositionX = this.rightLane;
-      }
-
-      this.trophyImage = Game.loadNewImage('assets/img/objects/gold_trophy.png');
-      this.trophyPositionY = 60;
-      this.trophySpeed = 1;
+    if (this.player.playerCollidesWithTrophy(this.trophy)) {
+      this.trophy = new Trophy(this.canvas);
     }
 
     // Collision detection of objects with bottom of the canvas
-    if (this.trophyPositionY + this.trophyImage.height > this.canvas.height) {
-      // Create a new trophy in a random lane
-      const random = Game.randomInteger(1, 3);
-      if (random === 1) {
-        this.trophyPositionX = this.leftLane;
-      }
-      if (random === 2) {
-        this.trophyPositionX = this.middleLane;
-      }
-      if (random === 3) {
-        this.trophyPositionX = this.rightLane;
-      }
-
-      this.trophyImage = Game.loadNewImage('assets/img/objects/gold_trophy.png');
-      this.trophyPositionY = 60;
-      this.trophySpeed = 1;
+    if (this.trophy.trophyCollidesWithCanvasBottom()) {
+      this.trophy = new Trophy(this.canvas);
     }
     return false;
   }
@@ -119,21 +98,11 @@ export default class Game {
       14,
     );
 
-    // Render the player
-    // Center the image in the lane with the x coordinates
-    ctx.drawImage(
-      this.playerImage,
-      this.playerPositionX - this.playerImage.width / 2,
-      this.canvas.height - 150,
-    );
+    // Render the trophy
+    this.trophy.renderTrophy(ctx);
 
-    // Render the objects
-    // Center the image in the lane with the x coordinates
-    ctx.drawImage(
-      this.trophyImage,
-      this.trophyPositionX - this.trophyImage.width / 2,
-      this.trophyPositionY,
-    );
+    // Render the player
+    this.player.renderPlayer(ctx);
   }
 
   /**
@@ -173,5 +142,21 @@ export default class Game {
    */
   public static randomInteger(min: number, max: number): number {
     return Math.round(Math.random() * (max - min) + min);
+  }
+
+  /**
+   * Loads an image in such a way that the screen doesn't constantly flicker
+   *
+   *
+   * NOTE: this is a 'static' method. This means that this method must be called like
+   * `Game.loadNewImage()` instead of `this.loadNewImage()`.
+   *
+   * @param source The address or URL of the a media resource that is to be loaded
+   * @returns an HTMLImageElement with the source as its src attribute
+   */
+  public static loadNewImage(source: string): HTMLImageElement {
+    const img = new Image();
+    img.src = source;
+    return img;
   }
 }

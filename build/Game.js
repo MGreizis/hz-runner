@@ -1,18 +1,14 @@
 import GameLoop from './GameLoop.js';
-import KeyListener from './KeyListener.js';
+import Player from './Player.js';
+import Trophy from './Trophy.js';
 export default class Game {
+    player;
+    trophy;
     canvas;
     leftLane;
     middleLane;
     rightLane;
-    keyListener;
     gameloop;
-    playerImage;
-    playerPositionX;
-    trophyImage;
-    trophyPositionX;
-    trophyPositionY;
-    trophySpeed;
     constructor(canvas) {
         this.canvas = canvas;
         this.canvas.width = window.innerWidth / 3;
@@ -20,65 +16,22 @@ export default class Game {
         this.leftLane = this.canvas.width / 4;
         this.middleLane = this.canvas.width / 2;
         this.rightLane = (this.canvas.width / 4) * 3;
-        this.keyListener = new KeyListener();
-        this.trophyImage = Game.loadNewImage('assets/img/objects/gold_trophy.png');
-        this.trophyPositionX = this.canvas.width / 2;
-        this.trophyPositionY = 60;
-        this.trophySpeed = 1;
-        this.playerImage = Game.loadNewImage('./assets/img/players/character_robot_walk0.png');
-        this.playerPositionX = this.canvas.width / 2;
-        console.log('start animation');
+        this.player = new Player(this.canvas);
+        this.trophy = new Trophy(this.canvas);
+        console.log('Start animation');
         this.gameloop = new GameLoop(this);
         this.gameloop.start();
     }
     processInput() {
-        if (this.keyListener.isKeyDown(KeyListener.KEY_LEFT)
-            && this.playerPositionX !== this.leftLane) {
-            this.playerPositionX = this.leftLane;
-        }
-        if (this.keyListener.isKeyDown(KeyListener.KEY_UP)
-            && this.playerPositionX !== this.middleLane) {
-            this.playerPositionX = this.middleLane;
-        }
-        if (this.keyListener.isKeyDown(KeyListener.KEY_RIGHT)
-            && this.playerPositionX !== this.rightLane) {
-            this.playerPositionX = this.rightLane;
-        }
+        this.player.processInput();
     }
     update(elapsed) {
-        this.trophyPositionY += this.trophySpeed * elapsed;
-        if (this.playerPositionX < this.trophyPositionX + this.trophyImage.width
-            && this.playerPositionX + this.playerImage.width > this.trophyPositionX
-            && this.canvas.height - 150 < this.trophyPositionY + this.trophyImage.height
-            && this.canvas.height - 150 + this.playerImage.height > this.trophyPositionY) {
-            const random = Game.randomInteger(1, 3);
-            if (random === 1) {
-                this.trophyPositionX = this.leftLane;
-            }
-            if (random === 2) {
-                this.trophyPositionX = this.middleLane;
-            }
-            if (random === 3) {
-                this.trophyPositionX = this.rightLane;
-            }
-            this.trophyImage = Game.loadNewImage('assets/img/objects/gold_trophy.png');
-            this.trophyPositionY = 60;
-            this.trophySpeed = 1;
+        this.trophy.moveTrophy(elapsed);
+        if (this.player.playerCollidesWithTrophy(this.trophy)) {
+            this.trophy = new Trophy(this.canvas);
         }
-        if (this.trophyPositionY + this.trophyImage.height > this.canvas.height) {
-            const random = Game.randomInteger(1, 3);
-            if (random === 1) {
-                this.trophyPositionX = this.leftLane;
-            }
-            if (random === 2) {
-                this.trophyPositionX = this.middleLane;
-            }
-            if (random === 3) {
-                this.trophyPositionX = this.rightLane;
-            }
-            this.trophyImage = Game.loadNewImage('assets/img/objects/gold_trophy.png');
-            this.trophyPositionY = 60;
-            this.trophySpeed = 1;
+        if (this.trophy.trophyCollidesWithCanvasBottom()) {
+            this.trophy = new Trophy(this.canvas);
         }
         return false;
     }
@@ -86,8 +39,8 @@ export default class Game {
         const ctx = this.canvas.getContext('2d');
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.writeTextToCanvas('UP arrow = middle | LEFT arrow = left | RIGHT arrow = right', this.canvas.width / 2, 40, 14);
-        ctx.drawImage(this.playerImage, this.playerPositionX - this.playerImage.width / 2, this.canvas.height - 150);
-        ctx.drawImage(this.trophyImage, this.trophyPositionX - this.trophyImage.width / 2, this.trophyPositionY);
+        this.trophy.renderTrophy(ctx);
+        this.player.renderPlayer(ctx);
     }
     writeTextToCanvas(text, xCoordinate, yCoordinate, fontSize = 20, color = 'red', alignment = 'center') {
         const ctx = this.canvas.getContext('2d');

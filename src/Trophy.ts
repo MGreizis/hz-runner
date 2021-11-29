@@ -11,19 +11,107 @@ export default class Trophy {
 
   private canvas: HTMLCanvasElement;
 
-  constructor() {
+  /**
+   * Constructor init
+   *
+   * @param canvas
+   */
+  constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
+
+    // x positions of the lanes in the canvas
+    const leftLane = this.canvas.width / 4;
+    const middleLane = this.canvas.width / 2;
+    const rightLane = (this.canvas.width / 4) * 3;
+
     // TODO create multiple objects over time
-    this.trophyImage = Game.loadNewImage('assets/img/objects/gold_trophy.png');
-    this.trophyPositionX = this.canvas.width / 2;
+    this.trophyImage = Trophy.loadNewImage('assets/img/objects/gold_trophy.png');
+    const randomLane = Game.randomInteger(1, 3);
+    if (randomLane === 1) {
+      this.trophyPositionX = leftLane;
+    }
+    if (randomLane === 2) {
+      this.trophyPositionX = middleLane;
+    }
+    if (randomLane === 3) {
+      this.trophyPositionX = rightLane;
+    }
     this.trophyPositionY = 60;
     this.trophySpeed = 1;
   }
 
-  public moveTrophy() {
+  /**
+   * Trophy horizontal position getter
+   *
+   * @returns trophyPositionX
+   */
+  public getTrophyPositionX(): number {
+    return this.trophyPositionX;
+  }
+
+  /**
+   * Trophy vertical position getter
+   *
+   * @returns trophyPositionY
+   */
+  public getTrophyPositionY(): number {
+    return this.trophyPositionY;
+  }
+
+  /**
+   * Trophy image height getter
+   *
+   * @returns trophyImage.height
+   */
+  public getTrophyImageHeight(): number {
+    return this.trophyImage.height;
+  }
+
+  /**
+   * Trophy image width getter
+   *
+   * @returns trophyImage.width
+   */
+  public getTrophyImageWidth(): number {
+    return this.trophyImage.width;
+  }
+
+  /**
+   * Movement of the trophy
+   *
+   * @param elapsed
+   */
+  public moveTrophy(elapsed: number): void {
     // Move objects
     // TODO adjust for multiple objects
     this.trophyPositionY += this.trophySpeed * elapsed;
+  }
+
+  /**
+   * Render the trophy
+   *
+   * @param ctx
+   */
+  public renderTrophy(ctx: CanvasRenderingContext2D): void {
+    // Render the objects
+    // Center the image in the lane with the x coordinates
+    ctx.drawImage(
+      this.trophyImage,
+      this.trophyPositionX - this.trophyImage.width / 2,
+      this.trophyPositionY,
+    );
+  }
+
+  /**
+   * Trophy collision with bottom of canvas
+   *
+   * @returns boolean
+   */
+  public trophyCollidesWithCanvasBottom(): boolean {
+    if (this.trophyPositionY + this.trophyImage.height > this.canvas.height) {
+      return true;
+    }
+    return false;
   }
 
   /**
