@@ -1,6 +1,6 @@
 import GameLoop from './GameLoop.js';
 import Player from './Player.js';
-import Trophy from './Trophy.js';
+import GoldTrophy from './GoldTrophy.js';
 
 /**
  * Main class of this Game.
@@ -8,7 +8,7 @@ import Trophy from './Trophy.js';
 export default class Game {
   private player: Player;
 
-  private trophy: Trophy;
+  private trophy: GoldTrophy;
 
   // The canvas
   private canvas: HTMLCanvasElement;
@@ -20,6 +20,8 @@ export default class Game {
   private rightLane: number;
 
   private gameloop: GameLoop;
+
+  private score: number;
 
   /**
    * Construct a new Game
@@ -42,7 +44,9 @@ export default class Game {
     this.player = new Player(this.canvas);
 
     // Create a trophy
-    this.trophy = new Trophy(this.canvas);
+    this.trophy = new GoldTrophy(this.canvas);
+
+    this.score = 0;
 
     // Start the animation
     console.log('Start animation');
@@ -71,12 +75,14 @@ export default class Game {
     // Use the bounding box detection method: https://computersciencewiki.org/index.php/Bounding_boxes
     // TODO adjust for multiple objects
     if (this.player.playerCollidesWithTrophy(this.trophy)) {
-      this.trophy = new Trophy(this.canvas);
+      this.trophy = new GoldTrophy(this.canvas);
+      this.score += this.trophy.getPoints();
     }
 
     // Collision detection of objects with bottom of the canvas
     if (this.trophy.trophyCollidesWithCanvasBottom()) {
-      this.trophy = new Trophy(this.canvas);
+      this.trophy = new GoldTrophy(this.canvas);
+      this.score -= 5;
     }
     return false;
   }
@@ -91,13 +97,8 @@ export default class Game {
     // Clear the entire canvas
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.writeTextToCanvas(
-      'UP arrow = middle | LEFT arrow = left | RIGHT arrow = right',
-      this.canvas.width / 2,
-      40,
-      14,
-    );
-
+    this.writeTextToCanvas('UP arrow = middle | LEFT arrow = left | RIGHT arrow = right', this.canvas.width / 2, 40, 14);
+    this.writeTextToCanvas(`Score: ${this.score}`, this.canvas.width / 2, 80, 14);
     // Render the trophy
     this.trophy.renderTrophy(ctx);
 

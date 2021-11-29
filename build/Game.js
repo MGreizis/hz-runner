@@ -1,6 +1,6 @@
 import GameLoop from './GameLoop.js';
 import Player from './Player.js';
-import Trophy from './Trophy.js';
+import GoldTrophy from './GoldTrophy.js';
 export default class Game {
     player;
     trophy;
@@ -9,6 +9,7 @@ export default class Game {
     middleLane;
     rightLane;
     gameloop;
+    score;
     constructor(canvas) {
         this.canvas = canvas;
         this.canvas.width = window.innerWidth / 3;
@@ -17,7 +18,8 @@ export default class Game {
         this.middleLane = this.canvas.width / 2;
         this.rightLane = (this.canvas.width / 4) * 3;
         this.player = new Player(this.canvas);
-        this.trophy = new Trophy(this.canvas);
+        this.trophy = new GoldTrophy(this.canvas);
+        this.score = 0;
         console.log('Start animation');
         this.gameloop = new GameLoop(this);
         this.gameloop.start();
@@ -28,10 +30,12 @@ export default class Game {
     update(elapsed) {
         this.trophy.moveTrophy(elapsed);
         if (this.player.playerCollidesWithTrophy(this.trophy)) {
-            this.trophy = new Trophy(this.canvas);
+            this.trophy = new GoldTrophy(this.canvas);
+            this.score += this.trophy.getPoints();
         }
         if (this.trophy.trophyCollidesWithCanvasBottom()) {
-            this.trophy = new Trophy(this.canvas);
+            this.trophy = new GoldTrophy(this.canvas);
+            this.score -= 5;
         }
         return false;
     }
@@ -39,6 +43,7 @@ export default class Game {
         const ctx = this.canvas.getContext('2d');
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.writeTextToCanvas('UP arrow = middle | LEFT arrow = left | RIGHT arrow = right', this.canvas.width / 2, 40, 14);
+        this.writeTextToCanvas(`Score: ${this.score}`, this.canvas.width / 2, 80, 14);
         this.trophy.renderTrophy(ctx);
         this.player.renderPlayer(ctx);
     }

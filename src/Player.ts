@@ -1,9 +1,11 @@
 import KeyListener from './KeyListener.js';
 import Game from './Game.js';
-import Trophy from './Trophy.js';
+import GoldTrophy from './GoldTrophy.js';
 
 export default class Player {
   private playerImage: HTMLImageElement;
+
+  private trophy: GoldTrophy;
 
   private playerPositionX: number;
 
@@ -22,6 +24,7 @@ export default class Player {
    * Constructor init
    *
    * @param canvas
+   * canvas parameter
    */
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -60,6 +63,7 @@ export default class Player {
    * Render the player
    *
    * @param ctx
+   * ctx parameter
    */
   public renderPlayer(ctx: CanvasRenderingContext2D): void {
     // Render the player
@@ -75,10 +79,11 @@ export default class Player {
    * Has the player collided with the trophy
    *
    * @param trophy
+   * trophy parameter
    * @returns boolean
    */
-  public playerCollidesWithTrophy(trophy: Trophy): boolean {
-    if (this.playerPositionX < trophy.getTrophyPositionY() + trophy.getTrophyImageWidth()
+  public playerCollidesWithTrophy(trophy: GoldTrophy): boolean {
+    if (this.playerPositionX < trophy.getTrophyPositionX() + trophy.getTrophyImageWidth()
       && this.playerPositionX + this.playerImage.width > trophy.getTrophyPositionX()
       && this.canvas.height - 150 < trophy.getTrophyPositionY() + trophy.getTrophyImageHeight()
       && this.canvas.height - 150 + this.playerImage.height > trophy.getTrophyPositionY()) {

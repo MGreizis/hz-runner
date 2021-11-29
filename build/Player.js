@@ -2,6 +2,7 @@ import KeyListener from './KeyListener.js';
 import Game from './Game.js';
 export default class Player {
     playerImage;
+    trophy;
     playerPositionX;
     keyListener;
     canvas;
@@ -35,7 +36,7 @@ export default class Player {
         ctx.drawImage(this.playerImage, this.playerPositionX - this.playerImage.width / 2, this.canvas.height - 150);
     }
     playerCollidesWithTrophy(trophy) {
-        if (this.playerPositionX < trophy.getTrophyPositionY() + trophy.getTrophyImageWidth()
+        if (this.playerPositionX < trophy.getTrophyPositionX() + trophy.getTrophyImageWidth()
             && this.playerPositionX + this.playerImage.width > trophy.getTrophyPositionX()
             && this.canvas.height - 150 < trophy.getTrophyPositionY() + trophy.getTrophyImageHeight()
             && this.canvas.height - 150 + this.playerImage.height > trophy.getTrophyPositionY()) {
